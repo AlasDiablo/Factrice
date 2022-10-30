@@ -1,0 +1,29 @@
+{
+  "name": "factrice",
+  "version": "1.0.0",
+  "description": "A RESTFul API to send email",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlasDiablo/Factrice.git"
+  },
+  "keywords": [
+    "API",
+    "Mailer",
+    "Micro-Service"
+  ],
+  "author": "AlasDiablo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AlasDiablo/Factrice/issues"
+  },
+  "homepage": "https://github.com/AlasDiablo/Factrice#readme",
+  "devDependencies": {
+    "eslint": "^8.26.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0"
+  }
+}
