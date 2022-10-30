@@ -1,6 +1,4 @@
-{
-    data: [
-        'content',
-        'footer'
-    ]
-}
+[
+    'content',
+    'footer'
+]
