@@ -11,7 +11,7 @@ export type Tokens = {
 export type MailRoute = {
     path: string;
     html: string;
-    data: any;
+    data: Array<{ key: string, attribute: string }>;
 }
 
 export type ApplicationContext = {

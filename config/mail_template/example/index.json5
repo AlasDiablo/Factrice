@@ -1,4 +1,14 @@
 [
-    'content',
-    'footer'
+    {
+        key: 'content',
+        attribute: 'innerHTML'
+    },
+    {
+        key: 'footer',
+        attribute: 'innerHTML'
+    },
+    {
+        key: 'image',
+        attribute: 'src'
+    }
 ]

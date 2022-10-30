@@ -1,28 +1,45 @@
 import { JSDOM } from 'jsdom';
 import _ from 'lodash';
 
+/**
+ * Document builder
+ */
 export default class DocumentBuilder {
     private readonly dom: JSDOM;
 
-    // eslint-disable-next-line no-undef
     private readonly document: Document;
+
+    private readonly dataType: Array<{ key: string, attribute: string }>;
 
     private readonly data: any;
 
-    constructor(html: string, data: any) {
+    /**
+     *
+     * @param html Email template html
+     * @param dataType Email template data
+     * @param data Request data
+     */
+    constructor(html: string, dataType: Array<{ key: string, attribute: string }>, data: any) {
         this.dom = new JSDOM(html);
         this.document = this.dom.window.document;
+        this.dataType = dataType;
         this.data = data;
     }
 
+    /**
+     * Build the html and serialize it
+     */
     build(): string {
-        _.keys(this.data).forEach((key) => {
-            // eslint-disable-next-line no-undef
-            const element: HTMLElement | null = this.document.querySelector(`[factrice-data="${key}"]`);
+        this.dataType.forEach((type) => {
+            const element: HTMLElement | null = this.document.querySelector(`[factrice-data="${type.key}"]`);
             if (element === undefined || element === null) {
-                throw new Error(`The key '${key}' is not defined in side the html document !`);
+                throw new Error(`The key '${type.key}' is not defined in side the html document !`);
             }
-            element.innerHTML = _.get(this.data, key);
+            const data = _.get(this.data, type.key);
+            if (data === undefined) {
+                throw new Error(`Missing data '${type.key}'`);
+            }
+            _.set(element, type.attribute, data);
         });
 
         return this.dom.serialize();
