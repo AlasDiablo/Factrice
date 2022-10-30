@@ -1,0 +1,14 @@
+{
+    "extends": "@tsconfig/node18/tsconfig.json",
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "module": "ES6",
+        "sourceMap": true,
+        "lib": [
+            "dom"
+        ]
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

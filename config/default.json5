@@ -1,0 +1,31 @@
+{
+    mail_service: {
+        host: '127.0.0.1',
+        port: 100,
+        // where to found login information, possible value ['config_file', 'environment_variable']
+        loginType: 'config_file',
+        // Remove this object if you use 'environment_variable'
+        login: {
+            username: '',
+            password: ''
+        },
+    },
+    // Use whitelist to allow only specific ip or host to access the api
+    // If null or undefined the whitelist will be automatically disabled
+    whitelist: {
+        enable: false,
+        autorized: [
+            '127.0.0.1',
+            'localhost'
+        ]
+    },
+    // Use token to identify who use the api
+    // If null or undefined the query_token will be automatically disabled
+    query_token: {
+        enable: false,
+        tokens: [
+            {'127.0.0.1':  'token_use_by_127.0.0.1'},
+            {'localhost':  'token_use_by_localhost'}
+        ]
+    }
+}
