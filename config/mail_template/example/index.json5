@@ -1,14 +1,17 @@
 [
     {
         key: 'content',
-        attribute: 'innerHTML'
+        attribute: 'innerHTML',
+        example: 'Content'
     },
     {
         key: 'footer',
-        attribute: 'innerHTML'
+        attribute: 'innerHTML',
+        example: 'Footer'
     },
     {
         key: 'image',
-        attribute: 'src'
+        attribute: 'src',
+        example: 'Image src'
     }
 ]

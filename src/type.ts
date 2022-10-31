@@ -11,7 +11,7 @@ export type Tokens = {
 export type MailRoute = {
     path: string;
     html: string;
-    data: Array<{ key: string, attribute: string }>;
+    data: Array<{ key: string, attribute: string, example: string}>;
 }
 
 export type ApplicationContext = {
@@ -23,4 +23,5 @@ export type ApplicationContext = {
     whitelist: WhiteList;
     tokens: Tokens;
     mailRoute: Map<string, MailRoute>;
+    swagger: any;
 };

@@ -7,6 +7,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import DocumentBuilder from './document-builder';
 import nodemailer from 'nodemailer';
+import swagger from 'swagger-ui-express';
 
 /**
  * Fonction use to create the application context
@@ -30,6 +31,17 @@ const buildContext = (): ApplicationContext => {
             authorized: [],
         },
         mailRoute: new Map<string, MailRoute>(),
+        swagger: {
+            swagger: '2.0',
+            info: {
+                version: '1.0.0',
+                title: 'Factrice - Available Route'
+            },
+            consumes: ['application/json'],
+            produces: ['application/json'],
+            paths: {},
+            definitions: {}
+        }
     };
 
     /**
@@ -79,16 +91,79 @@ const buildContext = (): ApplicationContext => {
      */
     fs.readdirSync('./config/mail_template/').forEach((path) => {
         const html = fs.readFileSync(`./config/mail_template/${path}/index.html`, {encoding: 'utf8'});
-        const data = JSON5.parse<Array<{ key: string, attribute: string }>>(fs.readFileSync(`./config/mail_template/${path}/index.json5`, {encoding: 'utf8'}));
+        const data = JSON5.parse<Array<{ key: string, attribute: string, example: string }>>(fs.readFileSync(`./config/mail_template/${path}/index.json5`, {encoding: 'utf8'}));
         context.mailRoute.set(path, {
             path,
             html,
             data,
         });
     });
+
+    /**
+     * Create swagger api
+     */
+    context.mailRoute.forEach((v: MailRoute, k: string) => {
+        // Build swagger models
+        const def = {
+            type: 'object',
+            properties: {
+                from: {
+                    type: 'string',
+                    example: 'sender@exemple.com'
+                },
+                to: {
+                    type: 'string',
+                    example: 'reciver@exemple.com'
+                },
+                subject: {
+                    type: 'string',
+                    example: 'Mail Subject'
+                }
+            }
+        };
+        v.data.forEach((data) => {
+            _.set(def.properties, data.key, {
+                type: 'string',
+                example: data.example
+            });
+        });
+        // Builder swagger path
+        const path = {
+            post: {
+                tags: ['Route'],
+                summary: `Send an email with '${k}' as template`,
+                operationId: `send-${k}`,
+                requestBody: {
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: `#/definitions/${k}`
+                            }
+                        },
+                        'application/x-www-form-urlencoded': {
+                            schema: {
+                                $ref: `#/definitions/${k}`
+                            }
+                        },
+                    },
+                    required: true
+                }
+            }
+        };
+        _.set(context.swagger.definitions, k, def);
+        _.set(context.swagger.paths, `/${k}`, path);
+    });
+
+    /**
+     * Return the build context
+     */
     return context;
 };
 
+/**
+ * Logger function
+ * @param params
+ */
 const log = (params: {route: string, status: number, message: string, ip: string}) => {
     let message = `\x1b[32m[${(new Date(Date.now())).toString()}]\x1b[0m `;
     message += `\x1b[34m${params.ip} \x1b[37m-> \x1b[33m${params.route}\x1b[0m | `;
@@ -133,6 +208,11 @@ app.use(bodyParser.urlencoded({
 app.use(express.json());
 
 /**
+ * Add swagger page
+ */
+app.use('/api-docs', swagger.serve, swagger.setup(applicationContext.swagger));
+
+/**
  * Send an error when the route is not available
  */
 app.param(['route'], (req, res, next, value) => {
@@ -175,7 +255,7 @@ app.param(['route'], (req, res, next, value) => {
 /**
  * Create route for each template
  */
-app.post('/:route', async (req, res) => {
+app.post('/:route', async (req , res) => {
     const route: MailRoute | undefined = applicationContext.mailRoute.get(req.params.route);
     if (route === undefined) {
         res.statusCode = 500;
@@ -204,7 +284,7 @@ app.post('/:route', async (req, res) => {
                 status: 200,
                 message: JSON.stringify(e),
             });
-            res.json({message: 'Email send'});
+            res.json(e);
         }).catch((err) => {
             res.statusCode = 500;
             res.json({error: err.message});
@@ -232,5 +312,6 @@ app.post('/:route', async (req, res) => {
  * Start the server
  */
 app.listen(applicationContext.server_port, () => {
-    console.log(`Server started at 127.0.0.1:${applicationContext.server_port} with ${applicationContext.mailRoute.size} loaded.`);
+    console.log(`Server started at http://127.0.0.1:${applicationContext.server_port} with ${applicationContext.mailRoute.size} loaded.`);
+    console.log(`All available route can be found at http://127.0.0.1:${applicationContext.server_port}/api-docs.`);
 });
