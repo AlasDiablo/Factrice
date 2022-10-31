@@ -175,7 +175,7 @@ app.param(['route'], (req, res, next, value) => {
 /**
  * Create route for each template
  */
-app.get('/:route', async (req, res) => {
+app.post('/:route', async (req, res) => {
     const route: MailRoute | undefined = applicationContext.mailRoute.get(req.params.route);
     if (route === undefined) {
         res.statusCode = 500;
