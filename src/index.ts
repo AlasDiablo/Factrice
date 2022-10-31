@@ -89,6 +89,17 @@ const buildContext = (): ApplicationContext => {
     return context;
 };
 
+const log = (params: {route: string, status: number, message: string, ip: string}) => {
+    let message = `\x1b[32m[${(new Date(Date.now())).toString()}]\x1b[0m `;
+    message += `\x1b[34m${params.ip} \x1b[37m-> \x1b[33m${params.route}\x1b[0m | `;
+    if (params.status !== 200) {
+        message += `\x1b[31m${params.status} - ${params.message}\x1b[0m`;
+    } else {
+        message += `\x1b[32m${params.status} - ${params.message}\x1b[0m`;
+    }
+    console.log(message);
+};
+
 /**
  * Create application context
  */
@@ -125,23 +136,56 @@ app.use(express.json());
  * Send an error when the route is not available
  */
 app.param(['route'], (req, res, next, value) => {
-    // Todo add whitelist and token system
+    if (applicationContext.whitelist.enable && !applicationContext.whitelist.authorized.includes(req.ip)) {
+        res.statusCode = 403;
+        res.json({error: 'Your are not allowed to query this api'});
+        log({
+            route: value,
+            ip: req.ip,
+            status: 403,
+            message: 'Your are not allowed to query this api'
+        });
+        return;
+    }
+    if (applicationContext.tokens.enable && applicationContext.tokens.authorized.get(req.ip) !== req.body.token) {
+        res.statusCode = 401;
+        res.json({error: 'Provide a valid api token'});
+        log({
+            route: value,
+            ip: req.ip,
+            status: 401,
+            message: 'Provide a valid api token'
+        });
+        return;
+    }
     if (!applicationContext.mailRoute.has(value)) {
         res.statusCode = 404;
         res.json({error: 'The asked route is not available'});
-    } else {
-        next();
+        log({
+            route: value,
+            ip: req.ip,
+            status: 404,
+            message: 'The asked route is not available'
+        });
+        return;
     }
+    next();
 });
 
 /**
  * Create route for each template
  */
-app.post('/:route', async (req, res) => {
+app.get('/:route', async (req, res) => {
     const route: MailRoute | undefined = applicationContext.mailRoute.get(req.params.route);
     if (route === undefined) {
         res.statusCode = 500;
         res.json({error: 'The current route is undefined for un unknown reason'});
+        log({
+            route: req.params.route,
+            ip: req.ip,
+            status: 500,
+            message: 'The current route is undefined for un unknown reason'
+        });
         return;
     }
     const document = new DocumentBuilder(route.html, route.data, req.body);
@@ -154,15 +198,32 @@ app.post('/:route', async (req, res) => {
             subject: req.body.subject,
             html,
         }).then((e) => {
-            console.log(e);
+            log({
+                route: req.params.route,
+                ip: req.ip,
+                status: 200,
+                message: JSON.stringify(e),
+            });
             res.json({message: 'Email send'});
         }).catch((err) => {
             res.statusCode = 500;
             res.json({error: err.message});
+            log({
+                route: req.params.route,
+                ip: req.ip,
+                status: 500,
+                message: err.message
+            });
         });
     } catch (err: any) {
         res.statusCode = 400;
         res.json({error: err.message});
+        log({
+            route: req.params.route,
+            ip: req.ip,
+            status: 400,
+            message: err.message,
+        });
         return;
     }
 });
