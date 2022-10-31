@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Factrice - Two-Factor Authentication</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            padding: 20px;
+        }
+        #container {
+            width: min(400px, calc(100% - 40px));
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #e7e7e7;
+            padding: 20px;
+            text-align: center;
+            border-radius: 6px;
+        }
+        #logo {
+            width: 25%;
+            margin-left: 37.5%;
+            margin-right: 37.5%;
+            background-color: floralwhite;
+            border-radius: 100px;
+        }
+        #code-container {
+            padding: 2px;
+            background-color: white;
+            border-radius: 6px;
+        }
+        #code-container h3 {
+            margin: 4px 0 0;
+        }
+        #code-container h3, #description, #system {
+            color: rgb(50, 50, 50);
+            text-decoration: none;
+        }
+        hr {
+            height: 2px;
+            border-width: 0;
+            color: lightgray;
+            background-color: lightgray;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <img id="logo"
+             src="https://raw.githubusercontent.com/AlasDiablo/Factrice/master/factrice.png"
+             alt="Factrice Logo">
+        <h2>Factrice - Two-Factor Authentication</h2>
+        <div id="code-container">
+            <h3>Here is your login code:</h3>
+            <h1 id="code" factrice-data="code"></h1>
+        </div>
+        <p id="description">If you did not initiate this request, please change
+            your password immediately to prevent fraudulent access to your
+            account.</p>
+        <hr>
+        <p id="system">
+            This mail have been sent by Factrice, please do not reply to it.
+        </p>
+    </div>
+</body>
+</html>
